@@ -1,7 +1,6 @@
 // TODO: 
-// Info Window -- Tues
 // Sidebar -- Thurs
-// Make detailed README -- Fri
+// Make detailed README and comments -- Fri
 function appViewModel() {
   var self = this;
   var city, mapOptions, map, input, searchBox;
@@ -33,6 +32,51 @@ function appViewModel() {
   input = (document.getElementById('pac-input'));
   searchBox = new google.maps.places.SearchBox((input));
 
+  var getFormattedAddress = function(place) {
+    var address = '';
+    var location = place.location;
+    if (!place.formatted_address && location) {
+      for (var i in place.location.formattedAddress) {
+        address += place.location.formattedAddress[i] + ' ';
+      }
+      address = address.slice(0, -1);
+      
+    } else {
+      address = place.formatted_address;
+    }
+
+    return address;
+  };
+
+  var getURL = function(place) {
+    var url = '';
+    var anchor = '';
+    if(place.url) {
+      url = place.url;
+    } else if (!place.formatted_address) {
+      url = "https://foursquare.com/v/" + place.id;
+    }
+    if (url.length > 0) {
+      anchor = '<a href="' + url + '" target=_blank> '+ place.name + '</a>';
+    } else {
+      anchor = place.name;
+    }
+    return anchor;
+  };
+
+  var getMoreInfo = function(place) {
+    var moreInfo = '';
+    place.rating ? moreInfo += '<p> Rating: ' + place.rating + '</p>' : false;
+    place.stats ? moreInfo +=  '<p> Checkins: ' + place.stats.checkinsCount + '</p>' : false;
+    return moreInfo;
+  };
+
+  var createInfoWindowContent = function(place) {
+    var contentString = '<h1 class="infoHeader">' + getURL(place) + '</h1>' +
+      '<p>' + getFormattedAddress(place) + '</p>' + getMoreInfo(place);
+    return contentString;
+  };
+
   // Set Google Place Markers into Map
   var setMarker = function(place) {
     var getPosition = function() {
@@ -60,6 +104,16 @@ function appViewModel() {
       icon: image,
       title: place.name,
       position: getPosition()
+    });
+
+
+    var infoWindow = new google.maps.InfoWindow({
+      content: createInfoWindowContent(place),
+      pixelOffset: new google.maps.Size(-25,0)
+    });
+
+    google.maps.event.addListener(marker, 'click', function() {
+      infoWindow.open(map, marker);
     });
 
     self.googleMapMarkers.push(marker);
@@ -128,6 +182,8 @@ function appViewModel() {
       data.forEach(function(item) {
         setMarker(item);
       });
+      console.log(self.googlePlacesInfo());
+        console.log(self.foursquareInfo());
     }).fail(function() {
       return "Could not get Foursquare data. Please try again!";
     });
