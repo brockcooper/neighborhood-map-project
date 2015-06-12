@@ -4,6 +4,6 @@ This project was made by integrating the Google Maps, Google Places, and Foursqu
 
 ### Running Project
 
-To run locally, clone the repo and run the index.html file.
+To run locally, clone the repo and run the index.html file. All API connection information is all ready to for use.
 
 To run online, visit the project [link here](http://brockcooper.github.io/neighborhood-map-project/) 
