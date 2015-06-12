@@ -1,16 +1,16 @@
-// TODO: 
-// Sidebar -- Thurs
-// Make detailed README and comments -- Fri
 function appViewModel() {
   var self = this;
-  var city, mapOptions, map, input, searchBox;
+  var city, mapOptions, map, input, searchBox, sidebar;
 
   // Create array that will populate the sidebar and keep track of Google Places and Yelp
   this.googleMapMarkers = ko.observableArray();
   this.googlePlacesInfo = ko.observableArray();
   this.foursquareInfo = ko.observableArray();
 
+  // set the Foursquare and googlePlace Icons... MapItemIcon will be set depending on if it is foursqure or places
   var foursquareIcon = "https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-logomark.png";
+  var googlePlaceIcon = "http://images.clipartpanda.com/google-location-icon-whitakergroup-google-location-icon-195x300.png";
+  var mapItemIcon = "";
 
   //initialize Google Maps variables
   // Start out with Salt Lake City
@@ -30,55 +30,66 @@ function appViewModel() {
   };
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
   input = (document.getElementById('pac-input'));
+  sidebar = (document.getElementById('sidebar'));
   searchBox = new google.maps.places.SearchBox((input));
 
-  var getFormattedAddress = function(place) {
+  // This will get the formatted address then set icon depending if Foursqaure or Places
+  var getFormattedAddressAndSetIcon = function(place) {
     var address = '';
     var location = place.location;
+
     if (!place.formatted_address && location) {
       for (var i in place.location.formattedAddress) {
         address += place.location.formattedAddress[i] + ' ';
       }
       address = address.slice(0, -1);
-      
+      mapItemIcon = foursquareIcon;
     } else {
       address = place.formatted_address;
+      mapItemIcon = googlePlaceIcon;
     }
 
     return address;
   };
 
+  // If there is a URL in the object then return it else leave it blank
   var getURL = function(place) {
     var url = '';
     var anchor = '';
-    if(place.url) {
+    if (place.url) {
       url = place.url;
     } else if (!place.formatted_address) {
       url = "https://foursquare.com/v/" + place.id;
     }
     if (url.length > 0) {
-      anchor = '<a href="' + url + '" target=_blank> '+ place.name + '</a>';
+      anchor = '<a href="' + url + '" target=_blank> ' + place.name + '</a>';
     } else {
       anchor = place.name;
     }
     return anchor;
   };
 
+  // Will return any checkin or ratings information if it is available
   var getMoreInfo = function(place) {
     var moreInfo = '';
     place.rating ? moreInfo += '<p> Rating: ' + place.rating + '</p>' : false;
-    place.stats ? moreInfo +=  '<p> Checkins: ' + place.stats.checkinsCount + '</p>' : false;
+    place.stats ? moreInfo += '<p> Checkins: ' + place.stats.checkinsCount + '</p>' : false;
     return moreInfo;
   };
 
-  var createInfoWindowContent = function(place) {
-    var contentString = '<h1 class="infoHeader">' + getURL(place) + '</h1>' +
-      '<p>' + getFormattedAddress(place) + '</p>' + getMoreInfo(place);
+  // This data goes in the InfoWindow and the side bar
+  var createInfoWindowContent = function(place, position) {
+    var address = getFormattedAddressAndSetIcon(place);
+    var contentString = '<h1 class="infoHeader">' +
+      '<button type="button" class="item-button" id="' + position + '">' +
+      '<img class="item-icon" src="' + mapItemIcon + '" /></button>' + getURL(place) + '</h1>' +
+      '<p>' + address + '</p>' + getMoreInfo(place);
     return contentString;
   };
 
   // Set Google Place Markers into Map
   var setMarker = function(place) {
+    // Returns position based off if it is foursquare or not
     var getPosition = function() {
       var position;
       if (!place.geometry) {
@@ -91,6 +102,7 @@ function appViewModel() {
       return position;
     };
 
+    // Which icon will it put down on the map?
     var image = {
       url: place.icon ? place.icon : foursquareIcon,
       size: new google.maps.Size(71, 71),
@@ -106,17 +118,24 @@ function appViewModel() {
       position: getPosition()
     });
 
+    self.googleMapMarkers.push(marker);
 
+    // Get the position in the array to use this later to open infowindows from sidebar
+    var markerPosition = self.googleMapMarkers().length - 1;
+    var HTMLContent = createInfoWindowContent(place, markerPosition);
+
+    // Generate InfoWindow
     var infoWindow = new google.maps.InfoWindow({
-      content: createInfoWindowContent(place),
-      pixelOffset: new google.maps.Size(-25,0)
+      content: HTMLContent,
+      pixelOffset: new google.maps.Size(-25, 0)
     });
 
     google.maps.event.addListener(marker, 'click', function() {
       infoWindow.open(map, marker);
     });
 
-    self.googleMapMarkers.push(marker);
+    // Put Info to side bar 
+    $('#sidebar').append(HTMLContent + '<hr>');
   };
 
   // Clears out map and info arrays
@@ -127,6 +146,9 @@ function appViewModel() {
     self.googleMapMarkers.removeAll();
     self.googlePlacesInfo.removeAll();
     self.foursquareInfo.removeAll();
+    // Clear out Sidebar in new search and show it if it is not there
+    $("#sidebar").empty();
+    $("#sidebar").show();
   };
 
   // Set the bounds of the map after you search
@@ -181,11 +203,19 @@ function appViewModel() {
       data = data.response.venues;
       data.forEach(function(item) {
         setMarker(item);
+        // Add this after all items set so you can open info window from sidebar
+        $('.item-button').on("click", function() {
+          var id = $(this).attr("id");
+          google.maps.event.trigger(self.googleMapMarkers()[id], 'click');
+        });
       });
-      console.log(self.googlePlacesInfo());
-        console.log(self.foursquareInfo());
     }).fail(function() {
-      return "Could not get Foursquare data. Please try again!";
+      console.log("Could not get Foursquare data. Please try again!");
+      // Still set this even if the foursqaure data fails
+      $('.item-button').on("click", function() {
+        var id = $(this).attr("id");
+        google.maps.event.trigger(self.googleMapMarkers()[id], 'click');
+      });
     });
   };
 
@@ -203,6 +233,8 @@ function appViewModel() {
       google.maps.event.trigger(map, "resize");
       map.setCenter(center);
     });
+    // Put sidebar and input bar onto the map
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(sidebar);
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
     // Listen for searches then set the new places for the new area/search
     google.maps.event.addListener(searchBox, 'places_changed', function() {
@@ -214,7 +246,7 @@ function appViewModel() {
         ne: map.getBounds().getNorthEast(),
         sw: map.getBounds().getSouthWest(),
         center: map.getBounds().getCenter(),
-        searchTerm: searchBox.gm_accessors_.places.Sc.formattedPrediction
+        searchTerm: searchBox.gm_accessors_.places.Qc.D
       };
 
       getFoursquareData(GPS);
@@ -227,6 +259,8 @@ function appViewModel() {
       searchBox.setBounds(bounds);
     });
   }
+
+
   mapInitialize();
 }
 
