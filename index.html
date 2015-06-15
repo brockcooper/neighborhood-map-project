@@ -5,21 +5,18 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link rel="stylesheet" href="assets/stylesheets/style.css">
-
-    <script>
-
-
-    </script>
+    <link rel="stylesheet" href="assets/stylesheets/offline.css">
+    <link rel="stylesheet" href="assets/stylesheets/offline-lang.css">
   </head>
   <body>
     <input id="pac-input" class="controls map-element" type="text" placeholder="Search Box" />
-    <div id="sidebar" class="controls map-element"></div>
+    <div id="sidebar" class="controls map-element sidebar"></div>
     <div id="map-canvas"></div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="assets/javascript/lib/knockout.min.js"></script>
-    <script src="assets/javascript/lib/oauth.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
-    <script src="assets/javascript/app.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
+    <script src="assets/javascript/app.js"></script>
+    <script src="assets/javascript/lib/offline.min.js"></script>
   </body>
 </html>

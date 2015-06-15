@@ -1,7 +1,9 @@
-html, body, #map-canvas {
+html, 
+body, 
+#map-canvas {
   height: 100%;
-  margin: 0px;
-  padding: 0px
+  margin: 0;
+  padding: 0;
 }
 .controls {
   margin-top: 16px;
@@ -16,18 +18,17 @@ html, body, #map-canvas {
 
 .map-element {
   background-color: #fff;
-  font-family: Roboto;
-  font-size: 15px;
-  font-weight: 300;
+  font: 300 15px Roboto;
   margin-left: 12px;
   padding: 0 11px 0 13px;
   width: 400px;
 }
 
-#sidebar {
-  max-height: 800px;
+.sidebar {
+  max-height: 85%;
   overflow: auto;
   display: none;
+  margin-right: 8px; 
 }
 
 #pac-input {
@@ -50,9 +51,7 @@ html, body, #map-canvas {
 }
 
 #type-selector label {
-  font-family: Roboto;
-  font-size: 13px;
-  font-weight: 300;
+  font: 300 13px Roboto;
 }
 
 #target {
@@ -75,3 +74,7 @@ html, body, #map-canvas {
   width: auto;
 }
 
+.alert {
+  font-weight: bold;
+  color: red;
+}

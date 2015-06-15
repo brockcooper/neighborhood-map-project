@@ -210,7 +210,7 @@ function appViewModel() {
         });
       });
     }).fail(function() {
-      console.log("Could not get Foursquare data. Please try again!");
+      $('#sidebar').append("<p class='alert'>Could not get Foursquare data. Please try again!</p>");
       // Still set this even if the foursqaure data fails
       $('.item-button').on("click", function() {
         var id = $(this).attr("id");
@@ -238,18 +238,23 @@ function appViewModel() {
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
     // Listen for searches then set the new places for the new area/search
     google.maps.event.addListener(searchBox, 'places_changed', function() {
-      var places = searchBox.getPlaces();
-      bounds = setBounds(places);
-      map.fitBounds(bounds);
-      map.setZoom(12);
-      var GPS = {
-        ne: map.getBounds().getNorthEast(),
-        sw: map.getBounds().getSouthWest(),
-        center: map.getBounds().getCenter(),
-        searchTerm: searchBox.gm_accessors_.places.Qc.D
-      };
-
-      getFoursquareData(GPS);
+      try {
+        var places = searchBox.getPlaces();
+        if (places == []) throw "Could not find results. Please try again!"
+        bounds = setBounds(places);
+        map.fitBounds(bounds);
+        map.setZoom(12);
+        var GPS = {
+          ne: map.getBounds().getNorthEast(),
+          sw: map.getBounds().getSouthWest(),
+          center: map.getBounds().getCenter(),
+          searchTerm: searchBox.gm_accessors_.places.Qc.D
+        };
+        getFoursquareData(GPS);
+      } catch(err) {
+        cleargooglePlacesMarkers();
+        $('#sidebar').append("<p class='alert'>Could not find results. Please try again!</p>");
+      } 
     });
 
     // Bias the SearchBox results towards places that are within the bounds of the
@@ -264,4 +269,4 @@ function appViewModel() {
   mapInitialize();
 }
 
-ko.applyBindings(new appViewModel);
+ko.applyBindings(new appViewModel());
