@@ -38,6 +38,7 @@ function appViewModel() {
   var closeSidebar = function() {
     $('#sidebar').hide();
     $('#menu-open').show();
+    $('#menu-open').css('margin-right', '8px');
   };
 
   // Open Sidebar
@@ -261,7 +262,8 @@ function appViewModel() {
     // Put sidebar and input bar onto the map
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(sidebar);
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(menu_open);
+    menu_open.style.marginLeft = '15px';
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(menu_open);
     // Listen for searches then set the new places for the new area/search
     google.maps.event.addListener(searchBox, 'places_changed', function() {
       try {
