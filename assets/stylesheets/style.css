@@ -35,7 +35,6 @@ body,
 #pac-input {
   height: 32px;
   text-overflow: ellipsis;
-
 }
 
 #pac-input:focus {
@@ -79,4 +78,31 @@ body,
 .alert {
   font-weight: bold;
   color: red;
+}
+
+.menu-open {
+  margin-top: 16px;
+  margin-right: 12px; 
+  cursor: pointer;
+  display: none;
+  float: right;
+}
+
+.cancel-icon {
+  padding: 15px;
+  cursor: pointer;
+  float: right;
+}
+
+@media screen and (max-width: 840px) {
+  .sidebar {
+    margin-top: 60px;
+    max-height: 45%;
+  }
+}
+
+@media screen and (max-width: 455px) {
+  #pac-input {
+    max-width: 80%;
+  }
 }

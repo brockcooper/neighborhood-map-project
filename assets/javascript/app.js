@@ -1,6 +1,6 @@
 function appViewModel() {
   var self = this;
-  var city, mapOptions, map, input, searchBox, sidebar;
+  var city, mapOptions, map, input, searchBox, sidebar, menu_open;
 
   // Create array that will populate the sidebar and keep track of Google Places and Yelp
   this.googleMapMarkers = ko.observableArray();
@@ -32,6 +32,19 @@ function appViewModel() {
   input = (document.getElementById('pac-input'));
   sidebar = (document.getElementById('sidebar'));
   searchBox = new google.maps.places.SearchBox((input));
+  menu_open = document.getElementById('menu-open');
+
+  // Close Sidebar
+  var closeSidebar = function() {
+    $('#sidebar').hide();
+    $('#menu-open').show();
+  };
+
+  // Open Sidebar
+  var openSidebar = function () {
+    $('#sidebar').show();
+    $('#menu-open').hide();
+  };
 
   // This will get the formatted address then set icon depending if Foursqaure or Places
   var getFormattedAddressAndSetIcon = function(place) {
@@ -148,7 +161,19 @@ function appViewModel() {
     self.foursquareInfo.removeAll();
     // Clear out Sidebar in new search and show it if it is not there
     $("#sidebar").empty();
+    $("#sidebar").append("<img src='assets/img/Cancel.png' class='cancel-icon' />");
     $("#sidebar").show();
+    $('#menu-open').hide();
+
+    // Listen for Sidebar Open
+    $('#menu-open').on('click', function(){
+      openSidebar();
+    });
+
+    // Listen for Sidebar Close
+    $('.cancel-icon').on('click', function(){
+      closeSidebar();
+    });
   };
 
   // Set the bounds of the map after you search
@@ -236,6 +261,7 @@ function appViewModel() {
     // Put sidebar and input bar onto the map
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(sidebar);
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(menu_open);
     // Listen for searches then set the new places for the new area/search
     google.maps.event.addListener(searchBox, 'places_changed', function() {
       try {
