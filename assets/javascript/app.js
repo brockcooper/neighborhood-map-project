@@ -268,7 +268,7 @@ function appViewModel() {
     google.maps.event.addListener(searchBox, 'places_changed', function() {
       try {
         var places = searchBox.getPlaces();
-        if (places == []) throw "Could not find results. Please try again!"
+        if (places == []) throw "Could not find results. Please try again!";
         bounds = setBounds(places);
         map.fitBounds(bounds);
         map.setZoom(12);
