@@ -21,15 +21,17 @@ body,
   font: 300 15px Roboto;
   margin-left: 12px;
   padding: 0 11px 0 13px;
-  width: 400px;
+  width: 300px;
   max-width: 95%;
 }
 
 .sidebar {
-  max-height: 85%;
+  max-height: 75%;
+  width: 300px;
   overflow: auto;
   display: none;
   margin-right: 8px; 
+  float: left;
 }
 
 #pac-input {
@@ -94,9 +96,8 @@ body,
   float: right;
 }
 
-@media screen and (max-width: 840px) {
+@media screen and (max-width: 1000px) {
   .sidebar {
-    margin-top: 60px;
     max-height: 45%;
   }
 }

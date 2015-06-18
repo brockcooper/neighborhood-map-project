@@ -1,11 +1,13 @@
 function appViewModel() {
   var self = this;
   var city, mapOptions, map, input, searchBox, sidebar, menu_open;
+  var infoWindow;
 
   // Create array that will populate the sidebar and keep track of Google Places and Yelp
   this.googleMapMarkers = ko.observableArray();
   this.googlePlacesInfo = ko.observableArray();
   this.foursquareInfo = ko.observableArray();
+  this.infoWindows = ko.observableArray();
 
   // set the Foursquare and googlePlace Icons... MapItemIcon will be set depending on if it is foursqure or places
   var foursquareIcon = "https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-logomark.png";
@@ -124,6 +126,7 @@ function appViewModel() {
       anchor: new google.maps.Point(17, 34),
       scaledSize: new google.maps.Size(25, 25)
     };
+
     // Create a marker for each place.
     var marker = new google.maps.Marker({
       map: map,
@@ -139,18 +142,27 @@ function appViewModel() {
     var HTMLContent = createInfoWindowContent(place, markerPosition);
 
     // Generate InfoWindow
-    var infoWindow = new google.maps.InfoWindow({
+    self.googleMapMarkers()[markerPosition].infoWindow = new google.maps.InfoWindow({
       content: HTMLContent,
       pixelOffset: new google.maps.Size(-25, 0)
     });
 
+    self.infoWindows.push(infoWindow);
+
     google.maps.event.addListener(marker, 'click', function() {
+      if (infoWindow) {
+        infoWindow.close();
+      }
+
+      infoWindow = self.googleMapMarkers()[markerPosition].infoWindow;
       infoWindow.open(map, marker);
     });
 
     // Put Info to side bar 
     $('#sidebar').append(HTMLContent + '<hr>');
   };
+
+
 
   // Clears out map and info arrays
   var cleargooglePlacesMarkers = function() {
@@ -160,6 +172,7 @@ function appViewModel() {
     self.googleMapMarkers.removeAll();
     self.googlePlacesInfo.removeAll();
     self.foursquareInfo.removeAll();
+    self.infoWindows.removeAll();
     // Clear out Sidebar in new search and show it if it is not there
     $("#sidebar").empty();
     $("#sidebar").append("<img src='assets/img/Cancel.png' class='cancel-icon' />");
@@ -260,8 +273,9 @@ function appViewModel() {
       map.setCenter(center);
     });
     // Put sidebar and input bar onto the map
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(sidebar);
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    map.controls[google.maps.ControlPosition.LEFT].push(sidebar);
+
     menu_open.style.marginLeft = '15px';
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(menu_open);
     // Listen for searches then set the new places for the new area/search
@@ -276,10 +290,11 @@ function appViewModel() {
           ne: map.getBounds().getNorthEast(),
           sw: map.getBounds().getSouthWest(),
           center: map.getBounds().getCenter(),
-          searchTerm: searchBox.gm_accessors_.places.Qc.D
+          searchTerm: $(input).text()
         };
         getFoursquareData(GPS);
       } catch(err) {
+        console.log(err);
         cleargooglePlacesMarkers();
         $('#sidebar').append("<p class='alert'>Could not find results. Please try again!</p>");
       } 
